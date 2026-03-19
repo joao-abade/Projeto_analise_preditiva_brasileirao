@@ -1,0 +1,69 @@
+import pandas as pd
+import sqlite3
+import time
+
+def ingest_fbref_data(ano):
+    # 1. Definição da URL (Brasileirão Série A daquele ano no FBref)
+    # O link do FBref segue um padrão. Para 2024, usamos o ID da competição 24.
+    url = f"https://fbref.com/pt/comps/24/{ano}/cronograma/{ano}-Serie-A-Resultados-e-Calendarios"
+    
+    print(f"Iniciando captura de dados de {ano}...")
+
+    try:
+        # 2. Leitura das tabelas HTML (O 'aspirador' do Pandas)
+        # O FBref retorna várias tabelas, a de resultados costuma ser a primeira [0]
+        tabs = pd.read_html(url)
+        df = tabs[0]
+
+        # 3. Limpeza Inicial (Data Cleaning)
+        # Removemos colunas vazias ou de 'Notas' que o FBref gera
+        df = df[['Data', 'Rodada', 'Mandante', 'Placar', 'Visitante', 'xG', 'xG.1']]
+        
+        # Renomeando para bater com o nosso Banco de Dados
+        df.columns = ['data', 'rodada', 'mandante', 'placar', 'visitante', 'xg_mandante', 'xg_visitante']
+
+        # Remove linhas que não são jogos (o FBref coloca cabeçalhos no meio da tabela)
+        df = df.dropna(subset=['data'])
+        df = df[df['data'] != 'Data']
+
+        # 4. Tratamento do Placar (Transformar '2–1' em colunas separadas)
+        # O caractere de traço do FBref às vezes é um 'en-dash', tratamos isso aqui:
+        df[['gols_mandante', 'gols_visitante']] = df['placar'].str.split('–', expand=True)
+        
+        # 5. Criando a coluna de 'Resultado Final' (Target para o modelo)
+        def define_resultado(row):
+            if pd.isna(row['gols_mandante']): return None
+            gm = int(row['gols_mandante'])
+            gv = int(row['gols_visitante'])
+            if gm > gv: return 'H' # Home (Casa)
+            if gv > gm: return 'A' # Away (Fora)
+            return 'D'             # Draw (Empate)
+
+        df['resultado_final'] = df.apply(define_resultado, axis=1)
+        df['temporada'] = ano
+
+        # 6. Conexão com o Banco e Ingestão
+        # Importante: o caminho aponta para a pasta 'data' que sugerimos
+        conn = sqlite3.connect('../../brasileirao_predict.db')
+        
+        # .to_sql envia o DataFrame direto para a tabela que criamos no setup_db
+        # 'append' garante que não vamos apagar o que já existe
+        df.to_sql('partidas_raw', conn, if_exists='append', index=False)
+        
+        conn.close()
+        print(f"Temporada {ano} salva com sucesso no banco!")
+
+    except Exception as e:
+        print(f"Erro ao processar: {e}")
+
+if __name__ == "__main__":
+    # Criamos uma lista com os anos que queremos
+    anos_para_buscar = [2022, 2023, 2024]
+
+    # O "for" vai percorrer a lista, um por um
+    for ano in anos_para_buscar:
+        ingest_fbref_data(ano) # A máquina roda para 2022, depois 2023, depois 2024
+        
+        # Lembra da ética? Esperamos um pouco entre um ano e outro
+        print("Aguardando 5 segundos para a próxima temporada...")
+        time.sleep(5)
