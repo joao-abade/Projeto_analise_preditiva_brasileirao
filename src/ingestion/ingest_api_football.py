@@ -1,7 +1,6 @@
 import requests
 import sqlite3
 import pandas as pd
-import requests
 
 def ingest_temporada(ano):
     
@@ -25,7 +24,7 @@ def ingest_temporada(ano):
     for jogo in jogos:
         
         data = jogo["fixture"]["date"][:10]
-        rodada = int(float(jogo["league"]["round"][-2:]))
+        rodada = int(float(jogo["league"]["round"].split("-")[1]))
         mandante = jogo["teams"]["home"]["name"]
         visitante = jogo["teams"]["away"]["name"]
         
@@ -44,7 +43,7 @@ def ingest_temporada(ano):
             gols_visitante = None
             resultado = None
             
-        cidade = jogo["venue"]["city"]
+        cidade = jogo["fixture"]["venue"]["city"]
                 
         dados_jogo = {
             'data' : data,
@@ -59,10 +58,11 @@ def ingest_temporada(ano):
 
         lista_banco.append(dados_jogo)
         
-    df = lista_banco
-    df.columns = ["data", "rodada", "mandante", "visitante", "gols_mandante", "gols_visitante", "cidade", "resultado"]
-    
-    conn = sqlite3.connect('../../brasileirao_predict.db')
+    df = pd.DataFrame(lista_banco)
+        
+    conn = sqlite3.connect('brasileirao_predict.db')
     df.to_sql('partidas', conn, if_exists='append', index=False)
     
     conn.close()
+if __name__ == "__main__":
+    ingest_temporada(2024)
