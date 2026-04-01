@@ -76,7 +76,7 @@ df_master = df_master.fillna(0)
 df_master = df_master.drop(columns=['gols_visitante', 'gols_mandante', 'cidade'])
 df_master_final = pd.get_dummies(df_master, columns=['condicao'], dtype=int)
 
-conn = sqlite3.connect('../../tb_modelagem.db')
-df_master_final.to_sql('model_input', conn, if_exists='append', index=False)
+conn = sqlite3.connect('tb_modelagem.db')
+df_master_final.to_sql('model_input', conn, if_exists='replace', index=False)
 
 conn.close()
