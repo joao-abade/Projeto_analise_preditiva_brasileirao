@@ -1,6 +1,8 @@
 import pandas as pd
 import sqlite3
 import time
+import requests
+import cloudscraper
 
 def ingest_fbref_data(ano):
     url = f"https://fbref.com/pt/comps/24/{ano}/cronograma/{ano}-Serie-A-Resultados-e-Calendarios"
@@ -8,7 +10,17 @@ def ingest_fbref_data(ano):
     print(f"Iniciando captura de dados de {ano}") #Markpoint para verificar se está rodando
     
     try:
-        tabs = pd.read_html(url)
+        scraper = cloudscraper.create_scraper(browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True
+        })
+        resposta = scraper.get(url)
+        if resposta.status_code != 200:
+            print(f"O site bloqueou. Código: {resposta.status_code}")
+            return
+        
+        tabs = pd.read_html(resposta.text)
         df = tabs[0]
         
         df = df[['Data', 'Rodada', 'Mandante', 'Placar', 'Visitante', 'xG', 'xG.1']]

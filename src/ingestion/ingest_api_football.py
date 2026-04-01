@@ -6,7 +6,7 @@ def ingest_temporada(ano):
     
     url = "https://v3.football.api-sports.io/fixtures"
     
-    headers = {"x-apisports-key": "55a42df527da8bb2c84ecc51c16ac3f4"}
+    headers = {"x-apisports-key": "SUA CHAVE AQUI"}
     
     params = {
         "league": "71", "season": str(ano)
@@ -14,7 +14,8 @@ def ingest_temporada(ano):
     
     resposta = requests.get(url, headers= headers, params= params)
     dados = resposta.json()
-    
+    print("MENSAGEM DA API:", dados.get('errors'))
+    print("PAGINAÇÃO:", dados.get('paging'))
     jogos = dados.get('response', [])
     
     print(f"Total de jogos encontrados: {len(jogos)}")
@@ -65,4 +66,4 @@ def ingest_temporada(ano):
     
     conn.close()
 if __name__ == "__main__":
-    ingest_temporada(2024)
+    ingest_temporada(2025)

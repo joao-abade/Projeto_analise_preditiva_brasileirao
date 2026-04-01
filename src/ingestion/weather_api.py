@@ -2,7 +2,7 @@ import requests
 
 def buscar_clima(local, data):
     
-    key = "SUA_CHAVE_AQUI"
+    key = "SUA CHAVE AQUI"
     unitgroup = "metric"
     contenttype = "json"
     include = "days"
