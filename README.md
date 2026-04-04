@@ -1,20 +1,25 @@
-Análise Preditiva do Brasileirão2024 
-Modelo de Machine Learning para previsão de resultados de partidas do Campeonato Brasileiro Série A 2024.
-
-Sobre o Projeto
+Brasileirão Predictor: Análise Preditiva com Machine Learning
 Este projeto utiliza inteligência artificial para prever os resultados dos jogos do Campeonato Brasileiro. O objetivo foi construir um pipeline completo de dados, desde a extração e tratamento até o treinamento de um modelo de Machine Learning capaz de superar a aleatoriedade estatística do esporte.
 
 Tecnologias Utilizadas
 Linguagem: Python 3.13
+
 Manipulação de Dados: Pandas e NumPy
+
 Banco de Dados: SQLite (Data Lake local)
+
 Machine Learning: Scikit-Learn (Algoritmo Random Forest)
+
 Versionamento: Git/GitHub
+
 
 Modelagem e Resultados
 Foi utilizado o algoritmo Random Forest Classifier. Após rodadas de ajustes de hiperparâmetros e um forte trabalho de Feature Engineering (incluindo o saldo técnico das equipes), o modelo atingiu:
+
 Precisão Final: 48%
+
 Performance: ~15% superior ao baseline aleatório.
+
 Este resultado é bastante expressivo para uma primeira versão de modelo, considerando que modelos profissionais de casas de apostas operam em faixas próximas a 53-58% de acerto.
 
 Estrutura do Projeto
